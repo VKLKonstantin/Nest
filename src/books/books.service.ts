@@ -4,23 +4,39 @@ import { UpdateBookDto } from './dto/update-book.dto';
 
 @Injectable()
 export class BooksService {
+  private books: CreateBookDto[] = [];
   create(createBookDto: CreateBookDto) {
-    return 'This action adds a new book';
+    return this.books.push(createBookDto);
   }
 
   findAll() {
-    return `This action returns all books`;
+    return this.books;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} book`;
+  findOne(idBook: string) {
+    return this.books.find((book) => book.idBook === idBook);
   }
 
-  update(id: number, updateBookDto: UpdateBookDto) {
-    return `This action updates a #${id} book`;
+  update(idBook: string, updateBookDto: UpdateBookDto) {
+    const indexBook = this.books.findIndex(
+      (element) => element.idBook === idBook,
+    );
+    if (indexBook !== -1) {
+      this.books[indexBook] = {
+        ...this.books[indexBook],
+        ...updateBookDto,
+      };
+    }
   }
+  remove(idBook: string) {
+    const indexBook = this.books.findIndex(
+      (element) => element.idBook === idBook,
+    );
 
-  remove(id: number) {
-    return `This action removes a #${id} book`;
+    if (indexBook !== -1) {
+      this.books.splice(indexBook, 1);
+    }
+
+    return `This action removes a #${idBook} book`;
   }
 }
