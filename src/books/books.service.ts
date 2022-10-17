@@ -1,42 +1,33 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { Book, BookDocument } from './models/books-schema';
 
 @Injectable()
 export class BooksService {
-  private books: CreateBookDto[] = [];
-  create(createBookDto: CreateBookDto) {
-    return this.books.push(createBookDto);
+  // private books: CreateBookDto[] = [];
+  constructor(@InjectModel(Book.name) private bookModel: Model<BookDocument>) { }
+  async create(createBookDto: CreateBookDto): Promise<Book> {
+    const newBook = new this.bookModel(createBookDto);
+    return newBook.save();
   }
 
-  findAll() {
-    return this.books;
+  async findAll(): Promise<Book[]> {
+    return this.bookModel.find().exec();
   }
 
-  findOne(idBook: string) {
-    return this.books.find((book) => book.idBook === idBook);
+  async findOne(id: string): Promise<Book> {
+    return this.bookModel.findById(id);
   }
 
-  update(idBook: string, updateBookDto: UpdateBookDto) {
-    const indexBook = this.books.findIndex(
-      (element) => element.idBook === idBook,
-    );
-    if (indexBook !== -1) {
-      this.books[indexBook] = {
-        ...this.books[indexBook],
-        ...updateBookDto,
-      };
-    }
+  async update(id: string, updateBookDto: UpdateBookDto) {
+    return this.bookModel.findByIdAndUpdate(id, updateBookDto, {
+      new: true,
+    });
   }
-  remove(idBook: string) {
-    const indexBook = this.books.findIndex(
-      (element) => element.idBook === idBook,
-    );
-
-    if (indexBook !== -1) {
-      this.books.splice(indexBook, 1);
-    }
-
-    return `This action removes a #${idBook} book`;
+  async remove(id: string): Promise<Book> {
+    return this.bookModel.findByIdAndRemove(id);
   }
 }
